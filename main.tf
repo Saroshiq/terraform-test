@@ -46,10 +46,9 @@ resource "github_repository_collaborator" "repo_collab" {
 }
 
 resource "github_branch_protection" "main_branch_protection" {
-  count          = (var.add_protection == true ? 1 : 0)
-  repository     = var.repo_name
-  branch         = "master"
-  enforce_admins = false
+  repository_id  = github_repository.var.repo_name
+  pattern          = "main"
+  enforce_admins   = false
 
   required_status_checks {
     strict   = false
@@ -57,16 +56,12 @@ resource "github_branch_protection" "main_branch_protection" {
   }
 
   required_pull_request_reviews {
-    dismiss_stale_reviews           = false
-    dismissal_users                 = []
-    dismissal_teams                 = data.github_team.approval_team[*].slug
-    required_approving_review_count = var.approval_master_branchs
+    dismiss_stale_reviews  = false
+    restrict_dismissals    = false
+    dismissal_restrictions = []
   }
 
-  restrictions {
-    users = []
-    teams = data.github_team.approval_team[*].slug
-    apps  = []
-  }
-  depends_on = [github_repository.users_repos, github_team_repository.teams_repo, github_team_repository.approvals_repo]
+  push_restrictions = [
+    data.github_team.existing_team[*].slug
+  ]
 }
