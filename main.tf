@@ -45,23 +45,3 @@ resource "github_repository_collaborator" "repo_collab" {
   depends_on = [github_repository.users_repos]
 }
 
-resource "github_branch_protection" "main_branch_protection" {
-  repository_id  = github_repository.var.repo_name
-  pattern          = "main"
-  enforce_admins   = false
-
-  required_status_checks {
-    strict   = false
-    contexts = []
-  }
-
-  required_pull_request_reviews {
-    dismiss_stale_reviews  = false
-    restrict_dismissals    = false
-    dismissal_restrictions = []
-  }
-
-  push_restrictions = [
-    data.github_team.existing_team[*].slug
-  ]
-}
