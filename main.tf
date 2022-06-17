@@ -37,3 +37,10 @@ resource "github_team_repository" "approvals_repo" {
   depends_on = [github_repository.users_repos]
 }
 
+resource "github_repository_collaborator" "repo_collab" {
+  count      = (var.collab[0] == "" ? 0 : length(var.collab))
+  repository = var.repo_name
+  username   = var.collab[count.index]
+  permission = var.collab_perm[count.index]
+  depends_on = [github_repository.users_repos]
+}
