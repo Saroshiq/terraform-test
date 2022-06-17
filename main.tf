@@ -44,3 +44,29 @@ resource "github_repository_collaborator" "repo_collab" {
   permission = var.collab_perm[count.index]
   depends_on = [github_repository.users_repos]
 }
+
+resource "github_branch_protection" "main_branch_protection" {
+  count          = (var.add_protection == true ? 1 : 0)
+  repository     = var.repo_name
+  branch         = "master"
+  enforce_admins = false
+
+  required_status_checks {
+    strict   = false
+    contexts = []
+  }
+
+  required_pull_request_reviews {
+    dismiss_stale_reviews           = false
+    dismissal_users                 = []
+    dismissal_teams                 = data.github_team.approval_team[*].slug
+    required_approving_review_count = var.approval_master_branchs
+  }
+
+  restrictions {
+    users = []
+    teams = data.github_team.approval_team[*].slug
+    apps  = []
+  }
+  depends_on = [github_repository.users_repos, github_team_repository.teams_repo, github_team_repository.approvals_repo]
+}
